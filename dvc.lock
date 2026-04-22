@@ -1,0 +1,210 @@
+schema: '2.0'
+stages:
+  data_fetch_join:
+    cmd: python src/data/data_fetching_and_joining.py
+    deps:
+    - path: src/data/data_fetching_and_joining.py
+      hash: md5
+      md5: 53d99868b02f3579581f8e0206e1989c
+      size: 2579
+    outs:
+    - path: data/interim/Fetch_join_data
+      hash: md5
+      md5: 3742e07f623eb5de2c48adb0a9294301.dir
+      size: 113892
+      nfiles: 2
+  data_Transformation:
+    cmd: python src/data/data_Transformation_cleaning.py
+    deps:
+    - path: data/interim/Fetch_join_data
+      hash: md5
+      md5: 3742e07f623eb5de2c48adb0a9294301.dir
+      size: 113892
+      nfiles: 2
+    - path: src/data/data_Transformation_cleaning.py
+      hash: md5
+      md5: 9cec47646250971670f0baf4de3818b8
+      size: 1192
+    outs:
+    - path: data/interim/Preprocessing_data
+      hash: md5
+      md5: 1633e0d3e6c47515410d581ede3d981f.dir
+      size: 111374
+      nfiles: 2
+  final_data_for_forecasting:
+    cmd: python src/data/final_data_forecasting.py
+    deps:
+    - path: data/interim/Preprocessing_data
+      hash: md5
+      md5: 1633e0d3e6c47515410d581ede3d981f.dir
+      size: 111374
+      nfiles: 2
+    - path: src/data/final_data_forecasting.py
+      hash: md5
+      md5: 36084acc5c9c956d929466453259519f
+      size: 953
+    outs:
+    - path: data/processed/cleaned_data/final_data_forecasting.csv
+      hash: md5
+      md5: 14c33909eb6dcfafa53f988105c223aa
+      size: 19920
+  feature_engineering_kwh:
+    cmd: python src/features/feature_engineering_kwh.py
+    deps:
+    - path: data/processed/cleaned_data/final_data_forecasting.csv
+      hash: md5
+      md5: 14c33909eb6dcfafa53f988105c223aa
+      size: 19920
+    - path: src/features/feature_engineering_kwh.py
+      hash: md5
+      md5: 849cfaea9724f3730cb2b9a49cff5738
+      size: 2883
+    outs:
+    - path: data/processed/feature_data/kwh_data/feature_engineered_data_kwh.csv
+      hash: md5
+      md5: 7f76b95a5e63ddd151663b4b033577e6
+      size: 40286
+  train_test_split_kwh:
+    cmd: python -m src.models.1_0_train_test_split_kwh
+    deps:
+    - path: data/processed/feature_data/kwh_data/feature_engineered_data_kwh.csv
+      hash: md5
+      md5: 7f76b95a5e63ddd151663b4b033577e6
+      size: 40286
+    - path: src/models/1_0_train_test_split_kwh.py
+      hash: md5
+      md5: 03c27ab8e41f56f54bb2cbbdde28a65e
+      size: 3144
+    params:
+      params.yaml:
+        split_data_kwh.train_size: 0.8
+    outs:
+    - path: data/train_test_data/train_test_kwh
+      hash: md5
+      md5: 909757ab3eb9301ac9561ce1d60f0d60.dir
+      size: 40680
+      nfiles: 4
+  train_model_train_data_kwh:
+    cmd: python -m src.models.1_1_train_model_kwh
+    deps:
+    - path: data/train_test_data/train_test_kwh
+      hash: md5
+      md5: 909757ab3eb9301ac9561ce1d60f0d60.dir
+      size: 40680
+      nfiles: 4
+    - path: src/models/1_1_train_model_kwh.py
+      hash: md5
+      md5: 2572662d9645b884160770b0603f6aba
+      size: 3066
+    params:
+      params.yaml:
+        model_train_kwh.learning_rate: 0.05
+        model_train_kwh.max_depth: 4
+        model_train_kwh.n_estimators: 201
+    outs:
+    - path: models/train_model/kwh_model/train_model_kwh.pkl
+      hash: md5
+      md5: c9e0e1e25fdb2f1c1b2fe83df2c0fa37
+      size: 313305
+  model_evaluation_kwh:
+    cmd: python -m src.models.1_2_model_Performence_kwh
+    deps:
+    - path: data/train_test_data/train_test_kwh
+      hash: md5
+      md5: 909757ab3eb9301ac9561ce1d60f0d60.dir
+      size: 40680
+      nfiles: 4
+    - path: models/train_model/kwh_model/train_model_kwh.pkl
+      hash: md5
+      md5: c9e0e1e25fdb2f1c1b2fe83df2c0fa37
+      size: 313305
+    - path: src/models/1_2_model_Performence_kwh.py
+      hash: md5
+      md5: 4a8aecef156dce53f892cb1928e15235
+      size: 3244
+    outs:
+    - path: accuracy_report/kwh_matrics/metrics_kwh.json
+      hash: md5
+      md5: c351b4c517686a5c0d3a6b3dd008b8e0
+      size: 131
+  final_model_kwh_training_registering:
+    cmd: python -m src.models.1_3_train_model_full_data_kwh
+    deps:
+    - path: data/processed/feature_data/kwh_data/feature_engineered_data_kwh.csv
+      hash: md5
+      md5: 7f76b95a5e63ddd151663b4b033577e6
+      size: 40286
+    - path: src/models/1_3_train_model_full_data_kwh.py
+      hash: md5
+      md5: c07b998fff74ec7eb96145394546619e
+      size: 4942
+    params:
+      params.yaml:
+        model_train_kwh.learning_rate: 0.05
+        model_train_kwh.max_depth: 4
+        model_train_kwh.n_estimators: 201
+    outs:
+    - path: models/final_model/kwh_model/model_kwh.pkl
+      hash: md5
+      md5: 11d04840229d78c53148e595f78b9d4b
+      size: 321051
+  feature_engineering_error:
+    cmd: python src/features/feature_engineering_error.py
+    deps:
+    - path: data/processed/cleaned_data/final_data_forecasting.csv
+      hash: md5
+      md5: 14c33909eb6dcfafa53f988105c223aa
+      size: 19920
+    - path: src/features/feature_engineering_error.py
+      hash: md5
+      md5: 2a166ae5dee589fd384692a772faa71d
+      size: 2737
+    outs:
+    - path: 
+        data/processed/feature_data/error_data/feature_engineered_data_error.csv
+      hash: md5
+      md5: 0e2a2e23197ab06043b40e6ac4e95b51
+      size: 42361
+  train_test_split_error:
+    cmd: python -m src.models.2_0_train_test_split_error
+    deps:
+    - path: 
+        data/processed/feature_data/error_data/feature_engineered_data_error.csv
+      hash: md5
+      md5: 0e2a2e23197ab06043b40e6ac4e95b51
+      size: 42361
+    - path: src/models/2_0_train_test_split_error.py
+      hash: md5
+      md5: f2aa10e41cc09c8febf2076795fa7aed
+      size: 3033
+    params:
+      params.yaml:
+        split_data_error.train_size: 0.8
+    outs:
+    - path: data/train_test_data/train_test_error
+      hash: md5
+      md5: d762359024520b11d919cb31e3a3991f.dir
+      size: 42892
+      nfiles: 4
+  train_model_train_data_error:
+    cmd: python -m src.models.2_1_train_model_error
+    deps:
+    - path: data/train_test_data/train_test_error
+      hash: md5
+      md5: d762359024520b11d919cb31e3a3991f.dir
+      size: 42892
+      nfiles: 4
+    - path: src/models/2_1_train_model_error.py
+      hash: md5
+      md5: e4e69be1543e28368fd1de3af16001cc
+      size: 3092
+    params:
+      params.yaml:
+        model_train_error.learning_rate: 0.05
+        model_train_error.max_depth: 4
+        model_train_error.n_estimators: 200
+    outs:
+    - path: models/train_model/error_model/train_model_error.pkl
+      hash: md5
+      md5: e1a65b9bd999434fd0ccbf29de79ef22
+      size: 293196
