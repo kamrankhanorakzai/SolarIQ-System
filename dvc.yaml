@@ -1,0 +1,117 @@
+stages:
+  data_fetch_join:
+    cmd: python src/data/data_fetching_and_joining.py
+    deps:
+    - src/data/data_fetching_and_joining.py
+    outs:
+    - data/interim/Fetch_join_data
+  data_Transformation:
+    cmd: python src/data/data_Transformation_cleaning.py
+    deps:
+    - src/data/data_Transformation_cleaning.py
+    - data/interim/Fetch_join_data
+    outs:
+    - data/interim/Preprocessing_data
+  final_data_for_forecasting:
+    cmd: python src/data/final_data_forecasting.py
+    deps:
+    - src/data/final_data_forecasting.py
+    - data/interim/Preprocessing_data
+    outs:
+    - data/processed/cleaned_data/final_data_forecasting.csv
+  feature_engineering_kwh:
+    cmd: python src/features/feature_engineering_kwh.py
+    deps:
+    - src/features/feature_engineering_kwh.py
+    - data/processed/cleaned_data/final_data_forecasting.csv
+    outs:
+    - data/processed/feature_data/kwh_data/feature_engineered_data_kwh.csv
+  train_test_split_kwh:
+    cmd: python -m src.models.1_0_train_test_split_kwh
+    deps:
+    - src/models/1_0_train_test_split_kwh.py
+    - data/processed/feature_data/kwh_data/feature_engineered_data_kwh.csv
+    params:
+    - split_data_kwh.train_size
+    outs:
+    - data/train_test_data/train_test_kwh
+  train_model_train_data_kwh:
+    cmd: python -m src.models.1_1_train_model_kwh
+    deps:
+    - src/models/1_1_train_model_kwh.py
+    - data/train_test_data/train_test_kwh
+    params:
+    - model_train_kwh.n_estimators
+    - model_train_kwh.max_depth
+    - model_train_kwh.learning_rate
+    outs:
+    - models/train_model/kwh_model/train_model_kwh.pkl
+  model_evaluation_kwh:
+    cmd: python -m src.models.1_2_model_Performence_kwh
+    deps:
+    - src/models/1_2_model_Performence_kwh.py
+    - models/train_model/kwh_model/train_model_kwh.pkl
+    - data/train_test_data/train_test_kwh
+    outs:
+    - accuracy_report/kwh_matrics/metrics_kwh.json
+  final_model_kwh_training_registering:
+    cmd: python -m src.models.1_3_train_model_full_data_kwh
+    deps:
+    - src/models/1_3_train_model_full_data_kwh.py
+    - data/processed/feature_data/kwh_data/feature_engineered_data_kwh.csv
+    params:
+    - model_train_kwh.n_estimators
+    - model_train_kwh.max_depth
+    - model_train_kwh.learning_rate
+    outs:
+    - models/final_model/kwh_model/model_kwh.pkl
+    # FORECASTING ERROR MODEL
+  feature_engineering_error:
+    cmd: python src/features/feature_engineering_error.py
+    deps:
+    - src/features/feature_engineering_error.py
+    - data/processed/cleaned_data/final_data_forecasting.csv
+    outs:
+    - data/processed/feature_data/error_data/feature_engineered_data_error.csv
+  train_test_split_error:
+    cmd: python -m src.models.2_0_train_test_split_error
+    deps:
+    - src/models/2_0_train_test_split_error.py
+    - data/processed/feature_data/error_data/feature_engineered_data_error.csv
+    params:
+    - split_data_error.train_size
+    outs:
+    - data/train_test_data/train_test_error
+  train_model_train_data_error:
+    cmd: python -m src.models.2_1_train_model_error
+    deps:
+    - src/models/2_1_train_model_error.py
+    - data/train_test_data/train_test_error
+    params:
+    - model_train_error.n_estimators
+    - model_train_error.max_depth
+    - model_train_error.learning_rate
+    outs:
+    - models/train_model/error_model/train_model_error.pkl
+  model_evaluation_error:
+    cmd: python -m src.models.2_2_model_Performence_error
+    deps:
+    - src/models/2_2_model_Performence_error.py
+    - models/train_model/error_model/train_model_error.pkl
+    - data/train_test_data/train_test_error
+    outs:
+    - accuracy_report/error_matrics/metrics_error.json
+  final_model_error_training_registering:
+    cmd: python -m src.models.2_3_train_model_full_data_error
+    deps:
+    - src/models/2_3_train_model_full_data_error.py
+    - data/processed/feature_data/error_data/feature_engineered_data_error.csv
+    params:
+    - model_train_error.n_estimators
+    - model_train_error.max_depth
+    - model_train_error.learning_rate
+    outs:
+    - models/final_model/error_model/final_model_error.pkl    
+
+
+
