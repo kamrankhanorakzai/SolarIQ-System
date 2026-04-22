@@ -77,11 +77,11 @@ stages:
       size: 3144
     params:
       params.yaml:
-        split_data_kwh.train_size: 0.8
+        split_data_kwh.train_size: 0.81
     outs:
     - path: data/train_test_data/train_test_kwh
       hash: md5
-      md5: 909757ab3eb9301ac9561ce1d60f0d60.dir
+      md5: 36684a4fe5ade0c1524f42322293be98.dir
       size: 40680
       nfiles: 4
   train_model_train_data_kwh:
@@ -89,7 +89,7 @@ stages:
     deps:
     - path: data/train_test_data/train_test_kwh
       hash: md5
-      md5: 909757ab3eb9301ac9561ce1d60f0d60.dir
+      md5: 36684a4fe5ade0c1524f42322293be98.dir
       size: 40680
       nfiles: 4
     - path: src/models/1_1_train_model_kwh.py
@@ -100,24 +100,24 @@ stages:
       params.yaml:
         model_train_kwh.learning_rate: 0.05
         model_train_kwh.max_depth: 4
-        model_train_kwh.n_estimators: 201
+        model_train_kwh.n_estimators: 200
     outs:
     - path: models/train_model/kwh_model/train_model_kwh.pkl
       hash: md5
-      md5: c9e0e1e25fdb2f1c1b2fe83df2c0fa37
-      size: 313305
+      md5: 2101058c421136f06166101010acf7b1
+      size: 314248
   model_evaluation_kwh:
     cmd: python -m src.models.1_2_model_Performence_kwh
     deps:
     - path: data/train_test_data/train_test_kwh
       hash: md5
-      md5: 909757ab3eb9301ac9561ce1d60f0d60.dir
+      md5: 36684a4fe5ade0c1524f42322293be98.dir
       size: 40680
       nfiles: 4
     - path: models/train_model/kwh_model/train_model_kwh.pkl
       hash: md5
-      md5: c9e0e1e25fdb2f1c1b2fe83df2c0fa37
-      size: 313305
+      md5: 2101058c421136f06166101010acf7b1
+      size: 314248
     - path: src/models/1_2_model_Performence_kwh.py
       hash: md5
       md5: 4a8aecef156dce53f892cb1928e15235
@@ -125,7 +125,7 @@ stages:
     outs:
     - path: accuracy_report/kwh_matrics/metrics_kwh.json
       hash: md5
-      md5: c351b4c517686a5c0d3a6b3dd008b8e0
+      md5: d9180155b95fb314b2cb55b58d73d848
       size: 131
   final_model_kwh_training_registering:
     cmd: python -m src.models.1_3_train_model_full_data_kwh
@@ -142,12 +142,12 @@ stages:
       params.yaml:
         model_train_kwh.learning_rate: 0.05
         model_train_kwh.max_depth: 4
-        model_train_kwh.n_estimators: 201
+        model_train_kwh.n_estimators: 200
     outs:
     - path: models/final_model/kwh_model/model_kwh.pkl
       hash: md5
-      md5: 11d04840229d78c53148e595f78b9d4b
-      size: 321051
+      md5: c36f8b3bee09f6df52df8fd5f8315062
+      size: 319338
   feature_engineering_error:
     cmd: python src/features/feature_engineering_error.py
     deps:
@@ -179,11 +179,11 @@ stages:
       size: 3033
     params:
       params.yaml:
-        split_data_error.train_size: 0.8
+        split_data_error.train_size: 0.81
     outs:
     - path: data/train_test_data/train_test_error
       hash: md5
-      md5: d762359024520b11d919cb31e3a3991f.dir
+      md5: 90823897d073229390e5d443feb580cc.dir
       size: 42892
       nfiles: 4
   train_model_train_data_error:
@@ -191,7 +191,7 @@ stages:
     deps:
     - path: data/train_test_data/train_test_error
       hash: md5
-      md5: d762359024520b11d919cb31e3a3991f.dir
+      md5: 90823897d073229390e5d443feb580cc.dir
       size: 42892
       nfiles: 4
     - path: src/models/2_1_train_model_error.py
@@ -202,9 +202,52 @@ stages:
       params.yaml:
         model_train_error.learning_rate: 0.05
         model_train_error.max_depth: 4
-        model_train_error.n_estimators: 200
+        model_train_error.n_estimators: 201
     outs:
     - path: models/train_model/error_model/train_model_error.pkl
       hash: md5
-      md5: e1a65b9bd999434fd0ccbf29de79ef22
-      size: 293196
+      md5: 808fa52084df06bec431205f9ceda541
+      size: 293894
+  model_evaluation_error:
+    cmd: python -m src.models.2_2_model_Performence_error
+    deps:
+    - path: data/train_test_data/train_test_error
+      hash: md5
+      md5: 90823897d073229390e5d443feb580cc.dir
+      size: 42892
+      nfiles: 4
+    - path: models/train_model/error_model/train_model_error.pkl
+      hash: md5
+      md5: 808fa52084df06bec431205f9ceda541
+      size: 293894
+    - path: src/models/2_2_model_Performence_error.py
+      hash: md5
+      md5: 0cf0a1d3b93e7e238b8af84295610346
+      size: 3377
+    outs:
+    - path: accuracy_report/error_matrics/metrics_error.json
+      hash: md5
+      md5: cf14291f2591dc6eabd0e5785f79f6b5
+      size: 165
+  final_model_error_training_registering:
+    cmd: python -m src.models.2_3_train_model_full_data_error
+    deps:
+    - path: 
+        data/processed/feature_data/error_data/feature_engineered_data_error.csv
+      hash: md5
+      md5: 0e2a2e23197ab06043b40e6ac4e95b51
+      size: 42361
+    - path: src/models/2_3_train_model_full_data_error.py
+      hash: md5
+      md5: df0ee3ce2bddc5ae59ce921a9d9fa431
+      size: 5287
+    params:
+      params.yaml:
+        model_train_error.learning_rate: 0.05
+        model_train_error.max_depth: 4
+        model_train_error.n_estimators: 201
+    outs:
+    - path: models/final_model/error_model/final_model_error.pkl
+      hash: md5
+      md5: 9b2b0eeea7fefcab8c7521fe68848bc4
+      size: 295349

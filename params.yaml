@@ -1,17 +1,17 @@
 model_train_kwh:
   learning_rate: 0.05
-  n_estimators: 201
+  n_estimators: 200
   max_depth: 4  
 split_data_kwh:
-  train_size: 0.80
+  train_size: 0.81
 days_to_predict_kwh: 
   days: 8
 
 model_train_error:
   learning_rate: 0.05
-  n_estimators: 200
+  n_estimators: 201
   max_depth: 4  
 split_data_error:
-  train_size: 0.80
+  train_size: 0.81
 days_to_predict_error: 
   days: 8
