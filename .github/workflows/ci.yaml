@@ -1,0 +1,79 @@
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  project-testing:
+    runs-on: ubuntu-latest
+
+    env:
+        AWS_HOST: ${{ secrets.AWS_HOST }}
+        AWS_PORT: ${{ secrets.AWS_PORT }}
+        AWS_DB: ${{ secrets.AWS_DB }}
+        AWS_USER: ${{ secrets.AWS_USER }}
+        AWS_PASS: ${{ secrets.AWS_PASS }}
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        DAGSHUB_TOKEN: ${{ secrets.DAGSHUB_TOKEN }}
+
+    steps:
+      # 1. Checkout repo
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # 2. Setup Python
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
+      # 3. Cache pip (speed up installs)
+      - name: Cache pip
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      # 4. Install dependencies
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          # pip install dvc
+
+
+      # 5. Run pipeline ONLY if DVC changed
+      - name: Run DVC pipeline
+        run: dvc repro
+
+      # 6. push 
+      - name: Push DVC data to S3
+        run: dvc push  
+      # 7. test api
+      - name: test_api
+        if: success()
+        env:
+          PYTHONPATH: .
+        run: python -m pytest -v 
+
+      - name: Log in to Docker Hub
+        if: success()
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
+
+      - name: Build Docker image
+        if: success()
+        run: |
+          docker build -t ${{ secrets.DOCKER_HUB_USERNAME }}/solar:latest .
+
+      - name: Push Docker image to Docker Hub
+        if: success()
+        run: |
+          docker push ${{ secrets.DOCKER_HUB_USERNAME }}/solar:latest
+
+       

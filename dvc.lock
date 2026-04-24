@@ -251,3 +251,15 @@ stages:
       hash: md5
       md5: 9b2b0eeea7fefcab8c7521fe68848bc4
       size: 295349
+  load_data_from_aws:
+    cmd: python src/data/load_data_aws.py
+    deps:
+    - path: src/data/load_data_aws.py
+      hash: md5
+      md5: b446eb95be48533f9a35ae90bdf74872
+      size: 1980
+    outs:
+    - path: data/processed/cleaned_data/final_data_forecasting.csv
+      hash: md5
+      md5: 14c33909eb6dcfafa53f988105c223aa
+      size: 19920
