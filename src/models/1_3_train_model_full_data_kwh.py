@@ -6,12 +6,12 @@ import joblib
 import mlflow
 import mlflow.sklearn
 from mlflow.tracking import MlflowClient
-from src.utils.mlflow_setup import setup_mlflow_kwh
+from src.utils.mlflow_setup import setup_mlflow
 
 # -------------------------------
 # MLFLOW SETUP
 # -------------------------------
-setup_mlflow_kwh()
+setup_mlflow("solar-performance-monitoring_kwh")
 
 # Load parameters
 with open("params.yaml", "r") as f:

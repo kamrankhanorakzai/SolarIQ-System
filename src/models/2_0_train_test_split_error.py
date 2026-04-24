@@ -2,12 +2,12 @@ import pandas as pd
 import os
 import yaml
 import mlflow
-from src.utils.mlflow_setup import setup_mlflow_error
+from src.utils.mlflow_setup import setup_mlflow
 
 # -------------------------------
 # MLFLOW SETUP
 # -------------------------------
-setup_mlflow_error()
+setup_mlflow("solar-performance-monitoring_error")
 
 # -------------------------------
 # LOAD PARAMS

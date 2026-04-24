@@ -2,12 +2,12 @@ import pandas as pd
 import os
 import yaml
 import mlflow
-from src.utils.mlflow_setup import setup_mlflow_kwh
+from src.utils.mlflow_setup import setup_mlflow
 
 # -------------------------------
 # MLFLOW SETUP
 # -------------------------------
-setup_mlflow_kwh()
+setup_mlflow("solar-performance-monitoring_kwh")
 
 # -------------------------------
 # LOAD PARAMS

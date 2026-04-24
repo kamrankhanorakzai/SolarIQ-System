@@ -7,12 +7,12 @@ import yaml
 import joblib
 import pandas as pd
 import mlflow
-from src.utils.mlflow_setup import setup_mlflow_kwh   # ✅ added
+from src.utils.mlflow_setup import setup_mlflow   # ✅ added
 
 # -------------------------------
 # MLFLOW SETUP
 # -------------------------------
-setup_mlflow_kwh()   # ✅ added
+setup_mlflow("solar-performance-monitoring_kwh")   # ✅ added
 
 with open("params.yaml", "r") as f:
     params = yaml.safe_load(f)

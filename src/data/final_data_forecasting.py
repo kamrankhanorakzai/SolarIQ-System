@@ -21,7 +21,8 @@ def merge_unit_error_data(df_unit, error_counts):
 error_counts = preprocess_error_data(df_error)
 df = merge_unit_error_data(df_unit, error_counts)
 
-output_dir = os.path.join(BASE_DIR, "data", "processed","cleaned_data")
+# output_dir = os.path.join(BASE_DIR, "data", "processed","cleaned_data")
+output_dir = os.path.join(BASE_DIR,"scrape_data")
 os.makedirs(output_dir, exist_ok=True)
 
 df.to_csv(os.path.join(output_dir, "final_data_forecasting.csv"), index=False)

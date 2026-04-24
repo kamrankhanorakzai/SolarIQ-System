@@ -5,13 +5,13 @@ import pandas as pd
 import joblib
 import mlflow
 import mlflow.sklearn
-from src.utils.mlflow_setup import setup_mlflow_error
+from src.utils.mlflow_setup import setup_mlflow
 
 
 # -------------------------------
 # MLFLOW SETUP
 # -------------------------------
-setup_mlflow_error()
+setup_mlflow("solar-performance-monitoring_error")
 
 # -------------------------------
 # PATHS
