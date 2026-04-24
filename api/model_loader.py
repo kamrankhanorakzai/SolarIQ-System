@@ -4,7 +4,7 @@ Model loading module - handles MLflow model loading and caching
 import os
 import mlflow
 from mlflow.tracking import MlflowClient
-from config import (
+from api.config import (
     KWH_MODEL_NAME,
     ERROR_MODEL_NAME,
     MODEL_ALIAS

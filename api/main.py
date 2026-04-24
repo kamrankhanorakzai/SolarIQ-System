@@ -2,13 +2,12 @@
 Solar Energy Prediction API - Main Application
 Endpoints for predicting solar energy (KWH and Error) with forecasting capability
 """
-import os
-import numpy as np
+
 import pandas as pd
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from load_data_aws import get_db_engine,load_from_postgres
-from config import (
+from api.load_data_aws import load_from_postgres
+from api.config import (
     API_TITLE,
     API_DESCRIPTION,
     API_VERSION,
@@ -21,7 +20,7 @@ from config import (
     DATE_COLUMN
 )
 
-from schemas import (
+from api.schemas import (
     ForecastRequest,
     KWHForecastResponse,
     ForecastedValue,
@@ -30,8 +29,8 @@ from schemas import (
     ModelInfoResponse
 )
 
-from models.model_loader import load_both_models
-from forecasting.forecaster import forecast
+from api.model_loader import load_both_models
+from api.forecaster import forecast
 
 
 # ==================== Initialize FastAPI App ====================
@@ -132,10 +131,10 @@ async def forecast_kwh(request: ForecastRequest):
     
     try:
         # Try to load data from environment or default path
-        engine = get_db_engine()
-        df_db = load_from_postgres("final_data_forecasting", engine)
+        df_db = load_from_postgres()
+
         data_path = df_db
-   
+        print(f"📂 Data loaded for forecasting: {data_path.shape}")
         df = data_path
         
         # Generate forecast
@@ -208,8 +207,8 @@ async def forecast_error(request: ForecastRequest):
         raise HTTPException(status_code=503, detail="Error model not loaded from MLflow registry")
     
     try:
-        engine = get_db_engine()
-        df_db = load_from_postgres("final_data_forecasting", engine)
+       
+        df_db = load_from_postgres()
         data_path = df_db
 
         # Load data

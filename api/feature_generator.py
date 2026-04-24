@@ -3,7 +3,7 @@ Feature engineering module - handles feature calculation from raw data
 """
 import pandas as pd
 import numpy as np
-from config import KWH_COLUMN
+from api.config import KWH_COLUMN
 
 
 def calculate_features_for_prediction(
