@@ -1,24 +1,40 @@
 stages:
-  data_fetch_join:
-    cmd: python src/data/data_fetching_and_joining.py
+  # data_fetch_join:
+  #   cmd: python src/data/data_fetching_and_joining.py
+  #   deps:
+  #   - src/data/data_fetching_and_joining.py
+  #   outs:
+  #   - data/interim/Fetch_join_data
+  # data_Transformation:
+  #   cmd: python src/data/data_Transformation_cleaning.py
+  #   deps:
+  #   - src/data/data_Transformation_cleaning.py
+  #   - data/interim/Fetch_join_data
+  #   outs:
+  #   - data/interim/Preprocessing_data
+  # final_data_for_forecasting:
+  #   cmd: python src/data/final_data_forecasting.py
+  #   deps:
+  #   - src/data/final_data_forecasting.py
+  #   - data/interim/Preprocessing_data
+  #   outs:  
+  #   - scrape_data/final_data_forecasting.csv
+
+  # save_data_to_aws:
+  #   cmd: python src/data/save_data_to_aws.py
+  #   deps:
+  #   - src/data/save_data_to_aws.py
+  #   - scrape_data/final_data_forecasting.csv
+
+
+
+  load_data_from_aws:
+    cmd: python src/data/load_data_aws.py
     deps:
-    - src/data/data_fetching_and_joining.py
+    - src/data/load_data_aws.py
     outs:
-    - data/interim/Fetch_join_data
-  data_Transformation:
-    cmd: python src/data/data_Transformation_cleaning.py
-    deps:
-    - src/data/data_Transformation_cleaning.py
-    - data/interim/Fetch_join_data
-    outs:
-    - data/interim/Preprocessing_data
-  final_data_for_forecasting:
-    cmd: python src/data/final_data_forecasting.py
-    deps:
-    - src/data/final_data_forecasting.py
-    - data/interim/Preprocessing_data
-    outs:
-    - data/processed/cleaned_data/final_data_forecasting.csv
+    - data/processed/cleaned_data/final_data_forecasting.csv    
+
   feature_engineering_kwh:
     cmd: python src/features/feature_engineering_kwh.py
     deps:
