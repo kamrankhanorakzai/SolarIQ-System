@@ -1,31 +1,37 @@
-import dagshub
+
 import mlflow
-import dotenv
 import os
+import dotenv
+
+
+
 dotenv.load_dotenv()
 
-def setup_mlflow_kwh():
-    dagshub.init(
-        repo_owner=os.getenv("repo_owner"),
-        repo_name=os.getenv("repo_name"),
-        mlflow=True
-    )
+def setup_mlflow(experiment_name: str):
+    try:
+        dagshub_token = os.getenv("DAGSHUB_TOKEN")
+        if not dagshub_token:
+            raise EnvironmentError("DAGSHUB_TOKEN is not set")
 
-    mlflow.set_tracking_uri(
-        os.getenv("set_tracking_uri")
-    )
+        os.environ["MLFLOW_TRACKING_USERNAME"] = dagshub_token
+        os.environ["MLFLOW_TRACKING_PASSWORD"] = dagshub_token
 
-    mlflow.set_experiment(os.getenv("experiment_kwh"))
+        dagshub_url = "https://dagshub.com"
+        repo_owner = "kamrankhanorakzai"
+        repo_name = "SolarIQ-System"
 
-def setup_mlflow_error():
-    dagshub.init(
-        repo_owner=os.getenv("repo_owner"),
-        repo_name=os.getenv("repo_name"),
-        mlflow=True
-    )
+        mlflow.set_tracking_uri(f"{dagshub_url}/{repo_owner}/{repo_name}.mlflow")
+        mlflow.set_experiment(experiment_name)
 
-    mlflow.set_tracking_uri(
-        os.getenv("set_tracking_uri")
-    )
+        print(f"✅ MLflow connected: {experiment_name}")
+        return True
 
-    mlflow.set_experiment(os.getenv("experiment_error"))
+    except Exception as e:
+        print(f"❌ MLflow setup error: {e}")
+        return False
+
+
+
+
+
+    
