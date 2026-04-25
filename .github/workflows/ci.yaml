@@ -75,5 +75,27 @@ jobs:
         if: success()
         run: |
           docker push ${{ secrets.DOCKER_HUB_USERNAME }}/solar:latest
+      # Deploy to AWS CodeDeploy using the uploaded ZIP file
+      - name: Deploy to EC2
+        if: success()
+        uses: appleboy/ssh-action@v0.1.5
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+             docker pull kamiorakzai/solar:latest
 
-       
+             docker stop solar || true
+             docker rm solar || true
+
+             docker run -d \
+              --name solar \
+              -p 80:8000 \
+              -e AWS_HOST=${{ secrets.AWS_HOST }} \
+              -e AWS_PORT=${{ secrets.AWS_PORT }} \
+              -e AWS_DB=${{ secrets.AWS_DB }} \
+              -e AWS_USER=${{ secrets.AWS_USER }} \
+              -e AWS_PASS=${{ secrets.AWS_PASS }} \
+              -e DAGSHUB_TOKEN=${{ secrets.DAGSHUB_TOKEN }} \
+              kamiorakzai/solar:latest
