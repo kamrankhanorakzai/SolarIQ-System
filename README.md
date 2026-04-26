@@ -21,99 +21,11 @@ the system provides actionable insights to optimize solar energy generation, det
 
 ## Project Structure
 
-    ├── README.md                          <- The top-level README for developers using this project.
-    ├── dvc.yaml                           <- DVC pipeline configuration file.
-    ├── params.yaml                        <- Model parameters and configuration settings.
-    ├── requirements.txt                   <- Python dependencies for the project.
-    │
-    ├── accuracy_report/                   <- Model performance metrics and reports.
-    │   ├── error_matrics/
-    │   │   └── metrics_error.json         <- Error model evaluation metrics.
-    │   └── kwh_matrics/
-    │       └── metrics_kwh.json           <- KWh model evaluation metrics.
-    │
-    ├── data/                              <- All data files and datasets.
-    │   ├── date_pointer.txt               <- Current data processing date pointer.
-    │   ├── interim/                       <- Intermediate data after initial transformations.
-    │   │   ├── Fetch_join_data/           <- Raw fetched and joined data.
-    │   │   │   ├── error_data.csv
-    │   │   │   └── unit_data.csv
-    │   │   └── Preprocessing_data/        <- Preprocessed data files.
-    │   │       ├── df_error.csv
-    │   │       └── df_unit.csv
-    │   ├── processed/                     <- Final processed datasets ready for modeling.
-    │   │   ├── cleaned_data/              <- Cleaned and consolidated data.
-    │   │   │   └── final_data_forecasting.csv
-    │   │   └── feature_data/              <- Feature-engineered datasets.
-    │   │       ├── error_data/
-    │   │       │   └── feature_engineered_data_error.csv
-    │   │       └── kwh_data/
-    │   │           └── feature_engineered_data_kwh.csv
-    │   ├── raw/                           <- Original, immutable data dumps.
-    │   │   ├── error_files/               <- Raw error data files.
-    │   │   └── unit_files/                <- Raw unit/performance data files.
-    │   └── train_test_data/               <- Split datasets for model training and testing.
-    │       ├── train_test_error/          <- Error prediction datasets.
-    │       │   ├── X_test.csv
-    │       │   ├── X_train.csv
-    │       │   ├── y_test.csv
-    │       │   └── y_train.csv
-    │       └── train_test_kwh/            <- KWh forecasting datasets.
-    │           ├── X_test.csv
-    │           ├── X_train.csv
-    │           ├── y_test.csv
-    │           └── y_train.csv
-    │
-    │
-    ├── models/                            <- Trained and serialized models.
-    │   ├── final_model/                   <- Final production-ready models.
-    │   │   ├── error_model/               <- Trained error prediction model.
-    │   │   └── kwh_model/                 <- Trained KWh forecasting model.
-    │   └── train_model/                   <- Intermediate/experimental models.
-    │       ├── error_model/               <- Error model training artifacts.
-    │       └── kwh_model/                 <- KWh model training artifacts.
-    │
-    ├── notebooks/                         <- Jupyter notebooks for analysis and experimentation.
-    │   ├── 01_webscraping(logs).ipynb     <- Web scraping and data collection from logs.
-    │   ├── 02_data_joining.ipynb          <- Data merging and alignment.
-    │   ├── 03_Exploratory_data_analysis.ipynb <- Data exploration and visualization.
-    │   ├── 04_Kwh_models.ipynb             <- Machine learning model development.
-    │   ├── 05_data_Transformation.ipynb   <- Data transformation and preprocessing.
-    │   ├── 06_feature_unit_forceast.ipynb <- Feature engineering for unit forecasting.
-    │   ├── 07_test_coding.ipynb           <- Testing and debugging notebook.
-    │   └── 08_error_models.ipynb                 <- Error Model Experiment and investigation.
-    │
-    └── src/                               <- Source code for use in this project.
-        ├── __init__.py                    <- Makes src a Python module.
-        │
-        ├── data/                          <- Scripts for data fetching and transformation.
-        │   ├── data_fetching_and_joining.py     <- Fetch and merge raw data.
-        │   ├── data_Transformation_cleaning.py  <- Clean and transform data.
-        │   └── final_data_forecasting.py        <- Prepare final forecasting datasets.
-        │
-        ├── features/                      <- Scripts for feature engineering.
-        │   ├── feature_engineering_error.py     <- Error model features.
-        │   └── feature_engineering_kwh.py       <- KWh forecasting features.
-        │
-        ├── models/                        <- Scripts for model training and prediction.
-        │   ├── __init__.py
-        │   ├── 1_0_train_test_split_kwh.py      <- Split KWh data for training.
-        │   ├── 1_1_train_model_kwh.py           <- Train KWh forecasting model.
-        │   ├── 1_2_model_Performence_kwh.py     <- Evaluate KWh model performance.
-        │   ├── 1_3_train_model_full_data_kwh.py <- Train final KWh model on full data.
-        │   ├── 1_4_model_registry.py            <- Model versioning and registry.
-        │   ├── 2_0_train_test_split_error.py    <- Split error data for training.
-        │   ├── 2_1_train_model_error.py         <- Train error prediction model.
-        │   ├── 2_2_model_Performence_error.py   <- Evaluate error model performance.
-        │   ├── 2_3_train_model_full_data_error.py <- Train final error model on full data.
-        │   └── 2_4_predict_model_error.py       <- Generate error predictions.
-        │
-        ├── utils/                         <- Utility functions and helpers.
-        │   ├── __init__.py
-        │   └── mlflow_setup.py            <- MLflow configuration and logging setup.
-        │
-        └── visualization/                 <- Scripts for data visualization and reporting.
-
+<p align="center">
+  <img src="project_directries.png" alt="Solar Architecture" width="900"/>
+  <br>
+  <em>Figure: project Directries</em>
+</p>
 
 --------
 ## Project RoadMap
@@ -121,7 +33,7 @@ the system provides actionable insights to optimize solar energy generation, det
 <p align="center">
   <img src="Solar_Project_RoadMap.png" alt="Solar Architecture" width="900"/>
   <br>
-  <em>Figure: Project Directries</em>
+  <em>Figure: End-to-End Solar Performance Monitoring & Forecasting Pipeline</em>
 </p>
 
 

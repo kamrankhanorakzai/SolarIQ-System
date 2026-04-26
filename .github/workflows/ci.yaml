@@ -4,80 +4,82 @@ on:
   workflow_dispatch:
 
 jobs:
+# =========================
+#  CI PIPELINE
+# =========================
   project-testing:
     runs-on: ubuntu-latest
 
     env:
-        AWS_HOST: ${{ secrets.AWS_HOST }}
-        AWS_PORT: ${{ secrets.AWS_PORT }}
-        AWS_DB: ${{ secrets.AWS_DB }}
-        AWS_USER: ${{ secrets.AWS_USER }}
-        AWS_PASS: ${{ secrets.AWS_PASS }}
-        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        DAGSHUB_TOKEN: ${{ secrets.DAGSHUB_TOKEN }}
+      AWS_HOST: ${{ secrets.AWS_HOST }}
+      AWS_PORT: ${{ secrets.AWS_PORT }}
+      AWS_DB: ${{ secrets.AWS_DB }}
+      AWS_USER: ${{ secrets.AWS_USER }}
+      AWS_PASS: ${{ secrets.AWS_PASS }}
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      DAGSHUB_TOKEN: ${{ secrets.DAGSHUB_TOKEN }}
 
     steps:
-      # 1. Checkout repo
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # 2. Setup Python
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.10"
 
-      # 3. Cache pip (speed up installs)
       - name: Cache pip
         uses: actions/cache@v4
         with:
           path: ~/.cache/pip
           key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
-          restore-keys: |
-            ${{ runner.os }}-pip-
 
-      # 4. Install dependencies
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-          # pip install dvc
 
-
-      # 5. Run pipeline ONLY if DVC changed
       - name: Run DVC pipeline
         run: dvc repro
 
-      # 6. push 
       - name: Push DVC data to S3
         run: dvc push  
-      # 7. test api
-      - name: test_api
-        if: success()
+
+      - name: Run tests
         env:
           PYTHONPATH: .
-        run: python -m pytest -v 
+        run: python -m pytest -v
+
+
+# =========================
+#  PRODUCTION PIPELINE
+# =========================
+  production:
+    needs: project-testing
+    runs-on: ubuntu-latest
+
+    environment: production   # 🔥 approval required here
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
 
       - name: Log in to Docker Hub
-        if: success()
         uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
 
       - name: Build Docker image
-        if: success()
         run: |
           docker build -t ${{ secrets.DOCKER_HUB_USERNAME }}/solar:latest .
 
-      - name: Push Docker image to Docker Hub
-        if: success()
+      - name: Push Docker image
         run: |
           docker push ${{ secrets.DOCKER_HUB_USERNAME }}/solar:latest
-      # Deploy to AWS CodeDeploy using the uploaded ZIP file
+
       - name: Deploy to EC2
-        if: success()
         uses: appleboy/ssh-action@v0.1.5
         with:
           host: ${{ secrets.EC2_HOST }}
@@ -85,20 +87,13 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
 
-            echo "==== Cleaning Docker system to free space ===="
-
-            # Stop and remove old container if exists
+            echo "==== Cleaning Docker system ===="
             docker stop solar || true
             docker rm solar || true
-
-            # Remove unused images, containers, cache
             docker system prune -af || true
 
-            # Remove dangling volumes 
-            docker volume prune -f || true
-
             echo "==== Pulling latest image ===="
-            docker pull kamiorakzai/solar:latest
+            docker pull ${{ secrets.DOCKER_HUB_USERNAME }}/solar:latest
 
             echo "==== Running container ===="
             docker run -d \
@@ -110,6 +105,6 @@ jobs:
               -e AWS_USER=${{ secrets.AWS_USER }} \
               -e AWS_PASS=${{ secrets.AWS_PASS }} \
               -e DAGSHUB_TOKEN=${{ secrets.DAGSHUB_TOKEN }} \
-              kamiorakzai/solar:latest
+              ${{ secrets.DOCKER_HUB_USERNAME }}/solar:latest
 
             echo "==== Deployment completed ===="
