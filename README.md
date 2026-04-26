@@ -121,7 +121,7 @@ the system provides actionable insights to optimize solar energy generation, det
 <p align="center">
   <img src="Solar_Project_RoadMap.png" alt="Solar Architecture" width="900"/>
   <br>
-  <em>Figure: End-to-End Solar Performance Monitoring & Forecasting Pipeline</em>
+  <em>Figure: Project Directries</em>
 </p>
 
 
