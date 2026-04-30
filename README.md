@@ -55,7 +55,7 @@ the system provides actionable insights to optimize solar energy generation, det
 ### 🔗 Live Power BI Dashboard
 
 👉 **Access Interactive Dashboard:**  
-[View Dashboard](https://app.powerbi.com/view?r=eyJrIjoiOWQ0YjM5YzctODU3Mi00ZGQwLTg4YTYtNDNhYjU3MjIxN2I5IiwidCI6IjAzYTA5Njg4LWVkYjYtNDUzZS04ZDBhLTg2OTVhZGQzMWQyYSIsImMiOjl9)
+[View Dashboard](https://app.fabric.microsoft.com/view?r=eyJrIjoiOWQ0YjM5YzctODU3Mi00ZGQwLTg4YTYtNDNhYjU3MjIxN2I5IiwidCI6IjAzYTA5Njg4LWVkYjYtNDUzZS04ZDBhLTg2OTVhZGQzMWQyYSIsImMiOjl9&pageName=59ff1193d4d9d0660e3b)
 
 ---
 
