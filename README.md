@@ -37,7 +37,11 @@ the system provides actionable insights to optimize solar energy generation, det
   <em>Figure: End-to-End Solar Performance Monitoring & Forecasting Pipeline</em>
 </p>
 
-## User Dashboard
+
+---
+
+## 📊 User Dashboard
+
 <p align="center">
   <img src="visualization/images/1.png" alt="Solar Dashboard" width="900"/>
   <br>
@@ -45,6 +49,15 @@ the system provides actionable insights to optimize solar energy generation, det
   <br>
   <em>Figure: User Dashboard For Forecasting</em>
 </p>
+
+---
+
+### 🔗 Live Power BI Dashboard
+
+👉 **Access Interactive Dashboard:**
+[https://app.powerbi.com/view?r=eyJrIjoiOWQ0YjM5YzctODU3Mi00ZGQwLTg4YTYtNDNhYjU3MjIxN2I5IiwidCI6IjAzYTA5Njg4LWVkYjYtNDUzZS04ZDBhLTg2OTVhZGQzMWQyYSIsImMiOjl9](https://app.powerbi.com/view?r=eyJrIjoiOWQ0YjM5YzctODU3Mi00ZGQwLTg4YTYtNDNhYjU3MjIxN2I5IiwidCI6IjAzYTA5Njg4LWVkYjYtNDUzZS04ZDBhLTg2OTVhZGQzMWQyYSIsImMiOjl9)
+
+---
 
 ## Key Directories
 
