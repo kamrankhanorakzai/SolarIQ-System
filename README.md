@@ -7,6 +7,7 @@ Analyze and monitor solar power plant performance using real-world data to gener
 - [Overview](#overview)
 - [Project Structure](#project-structure)
 - [Project RoadMap](#Project-RoadMap)
+- [User Dashboard](#User-Dashboard)
 - [Key Directories](#key-directories)
 - [Data Pipeline](#data-pipeline)
 - [Machine Learning Models](#machine-learning-models)
@@ -36,6 +37,14 @@ the system provides actionable insights to optimize solar energy generation, det
   <em>Figure: End-to-End Solar Performance Monitoring & Forecasting Pipeline</em>
 </p>
 
+## User Dashboard
+<p align="center">
+  <img src="visualization/images/1.png" alt="Solar Dashboard" width="900"/>
+  <br>
+  <img src="visualization/images/2.png" alt="Solar Dashboard" width="900"/>
+  <br>
+  <em>Figure: User Dashboard For Forecasting</em>
+</p>
 
 ## Key Directories
 
