@@ -12,8 +12,8 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      AWS_HOST: 127.0.0.1
-      AWS_PORT: 5433
+      AWS_HOST: ${{ secrets.AWS_HOST }}
+      AWS_PORT: ${{ secrets.AWS_PORT }}
       AWS_DB: ${{ secrets.AWS_DB }}
       AWS_USER: ${{ secrets.AWS_USER }}
       AWS_PASS: ${{ secrets.AWS_PASS }}
