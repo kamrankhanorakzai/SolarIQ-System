@@ -25,9 +25,9 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # -------------------------
-      # Setup SSH
-      # -------------------------
+      # =========================
+      # SSH SETUP
+      # =========================
       - name: Setup SSH Key
         run: |
           mkdir -p ~/.ssh
@@ -35,31 +35,38 @@ jobs:
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
 
-      # -------------------------
-      # Start SSH Tunnel
-      # -------------------------
+      # =========================
+      # START SSH TUNNEL (STABLE)
+      # =========================
       - name: Start SSH Tunnel to RDS
         run: |
           echo "Starting SSH tunnel..."
+
           ssh -i ~/.ssh/id_rsa \
             -o StrictHostKeyChecking=no \
-            -N -L 5433:${{ secrets.RDS_ENDPOINT }}:5432 \
+            -o ServerAliveInterval=60 \
+            -o ServerAliveCountMax=5 \
+            -N \
+            -L 5433:${{ secrets.RDS_ENDPOINT }}:5432 \
             ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} &
 
           echo $! > tunnel.pid
-          sleep 8
 
-      # -------------------------
-      # Verify tunnel
-      # -------------------------
-      - name: Verify Tunnel
+          echo "Waiting for tunnel to stabilize..."
+          sleep 10
+
+      # =========================
+      # VERIFY TUNNEL
+      # =========================
+      - name: Verify tunnel connection
         run: |
-          ps aux | grep ssh || true
-          netstat -tulnp | grep 5433 || echo "Tunnel may still be starting"
+          sudo apt-get update && sudo apt-get install -y netcat
 
-      # -------------------------
-      # Setup Python
-      # -------------------------
+          nc -zv 127.0.0.1 5433 || (echo "❌ Tunnel failed" && exit 1)
+
+      # =========================
+      # PYTHON SETUP
+      # =========================
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
@@ -76,26 +83,26 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      # -------------------------
-      # Run DVC pipeline
-      # -------------------------
+      # =========================
+      # RUN DVC PIPELINE
+      # =========================
       - name: Run DVC pipeline
         run: dvc repro
 
       - name: Push DVC data to S3
-        run: dvc push  
+        run: dvc push
 
-      # -------------------------
-      # Run tests
-      # -------------------------
+      # =========================
+      # TESTS
+      # =========================
       - name: Run tests
         env:
           PYTHONPATH: .
         run: python -m pytest -v
 
-      # -------------------------
-      # Cleanup SSH tunnel
-      # -------------------------
+      # =========================
+      # CLEANUP TUNNEL
+      # =========================
       - name: Kill SSH Tunnel
         if: always()
         run: |
@@ -109,38 +116,38 @@ jobs:
     needs: project-testing
     runs-on: ubuntu-latest
 
-    environment: production   # approval required
+    environment: production
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # -------------------------
-      # Docker Login
-      # -------------------------
+      # =========================
+      # DOCKER LOGIN
+      # =========================
       - name: Log in to Docker Hub
         uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
 
-      # -------------------------
-      # Build Image
-      # -------------------------
+      # =========================
+      # BUILD IMAGE
+      # =========================
       - name: Build Docker image
         run: |
           docker build -t ${{ secrets.DOCKER_HUB_USERNAME }}/solar:latest .
 
-      # -------------------------
-      # Push Image
-      # -------------------------
+      # =========================
+      # PUSH IMAGE
+      # =========================
       - name: Push Docker image
         run: |
           docker push ${{ secrets.DOCKER_HUB_USERNAME }}/solar:latest
 
-      # -------------------------
-      # Deploy to EC2
-      # -------------------------
+      # =========================
+      # DEPLOY TO EC2
+      # =========================
       - name: Deploy to EC2
         uses: appleboy/ssh-action@v0.1.5
         with:
