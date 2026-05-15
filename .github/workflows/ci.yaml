@@ -36,7 +36,7 @@ jobs:
           ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
 
       # =========================
-      # START SSH TUNNEL (STABLE)
+      # START SSH TUNNEL
       # =========================
       - name: Start SSH Tunnel to RDS
         run: |
@@ -52,17 +52,16 @@ jobs:
 
           echo $! > tunnel.pid
 
-          echo "Waiting for tunnel to stabilize..."
+          echo "Waiting for tunnel..."
           sleep 10
 
       # =========================
-      # VERIFY TUNNEL
+      # VERIFY TUNNEL (NO NETCAT)
       # =========================
-      - name: Verify tunnel connection
+      - name: Verify tunnel
         run: |
-          sudo apt-get update && sudo apt-get install -y netcat
-
-          nc -zv 127.0.0.1 5433 || (echo "❌ Tunnel failed" && exit 1)
+          timeout 5 bash -c "</dev/tcp/127.0.0.1/5433" \
+          || (echo "❌ Tunnel failed" && exit 1)
 
       # =========================
       # PYTHON SETUP
@@ -101,7 +100,7 @@ jobs:
         run: python -m pytest -v
 
       # =========================
-      # CLEANUP TUNNEL
+      # CLEANUP
       # =========================
       - name: Kill SSH Tunnel
         if: always()
@@ -125,7 +124,7 @@ jobs:
       # =========================
       # DOCKER LOGIN
       # =========================
-      - name: Log in to Docker Hub
+      - name: Login to Docker Hub
         uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
