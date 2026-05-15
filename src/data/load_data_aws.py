@@ -20,7 +20,7 @@ def get_db_engine():
         db_user = os.getenv("AWS_USER")
         db_password = os.getenv("AWS_PASS")
         db_host = os.getenv("AWS_HOST")
-        db_port = os.getenv("AWS_PORT", 5432)
+        db_port = os.getenv("AWS_PORT")
         db_name = os.getenv("AWS_DB")
 
         # safety check (IMPORTANT)

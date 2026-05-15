@@ -8,48 +8,79 @@ jobs:
 #  CI PIPELINE
 # =========================
   project-testing:
-    runs-on: ubuntu-latest
+  runs-on: ubuntu-latest
 
-    env:
-      AWS_HOST: ${{ secrets.AWS_HOST }}
-      AWS_PORT: ${{ secrets.AWS_PORT }}
-      AWS_DB: ${{ secrets.AWS_DB }}
-      AWS_USER: ${{ secrets.AWS_USER }}
-      AWS_PASS: ${{ secrets.AWS_PASS }}
-      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      DAGSHUB_TOKEN: ${{ secrets.DAGSHUB_TOKEN }}
+  env:
+    AWS_HOST: 127.0.0.1
+    AWS_PORT: 5433
+    AWS_DB: ${{ secrets.AWS_DB }}
+    AWS_USER: ${{ secrets.AWS_USER }}
+    AWS_PASS: ${{ secrets.AWS_PASS }}
+    AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+    AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+    DAGSHUB_TOKEN: ${{ secrets.DAGSHUB_TOKEN }}
 
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+  steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
 
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.10"
+    - name: Setup SSH Key
+      run: |
+        mkdir -p ~/.ssh
+        echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/id_rsa
+        chmod 600 ~/.ssh/id_rsa
+        ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
 
-      - name: Cache pip
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+    - name: Start SSH Tunnel to RDS
+      run: |
+        echo "Starting SSH tunnel..."
+        ssh -i ~/.ssh/id_rsa \
+          -o StrictHostKeyChecking=no \
+          -N -L 5433:${{ secrets.RDS_ENDPOINT }}:5432 \
+          ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} &
+        
+        echo "Waiting for tunnel..."
+        sleep 5
 
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
+    - name: Verify tunnel
+      run: |
+        netstat -tulnp | grep 5433 || echo "Tunnel may still be starting"
 
-      - name: Run DVC pipeline
-        run: dvc repro
+    - name: Setup Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.10"
 
-      - name: Push DVC data to S3
-        run: dvc push  
+    - name: Cache pip
+      uses: actions/cache@v4
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
 
-      - name: Run tests
-        env:
-          PYTHONPATH: .
-        run: python -m pytest -v
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Run DVC pipeline
+      run: dvc repro
+
+    - name: Push DVC data to S3
+      run: dvc push  
+
+    - name: Run tests
+      env:
+        PYTHONPATH: .
+      run: python -m pytest -v
+
+    - name: Kill SSH tunnel
+      run: |
+        pkill -f "ssh -i ~/.ssh/id_rsa" || true
+
+    - name: Run tests
+      env:
+        PYTHONPATH: .
+      run: python -m pytest -v
 
 
 # =========================
@@ -70,7 +101,6 @@ jobs:
         with:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
-
       - name: Build Docker image
         run: |
           docker build -t ${{ secrets.DOCKER_HUB_USERNAME }}/solar:latest .
@@ -88,23 +118,20 @@ jobs:
           script: |
 
             echo "==== Cleaning Docker system ===="
-            docker stop solar || true
-            docker rm solar || true
+
+            # Stop all running containers
+            docker stop $(docker ps -q) 2>/dev/null || true
+
+            # Remove all containers
+            docker rm $(docker ps -aq) 2>/dev/null || true
+
+            # Remove unused images, networks, cache
             docker system prune -af || true
 
             echo "==== Pulling latest image ===="
             docker pull ${{ secrets.DOCKER_HUB_USERNAME }}/solar:latest
 
             echo "==== Running container ===="
-            docker run -d \
-              --name solar \
-              -p 80:8000 \
-              -e AWS_HOST=${{ secrets.AWS_HOST }} \
-              -e AWS_PORT=${{ secrets.AWS_PORT }} \
-              -e AWS_DB=${{ secrets.AWS_DB }} \
-              -e AWS_USER=${{ secrets.AWS_USER }} \
-              -e AWS_PASS=${{ secrets.AWS_PASS }} \
-              -e DAGSHUB_TOKEN=${{ secrets.DAGSHUB_TOKEN }} \
-              ${{ secrets.DOCKER_HUB_USERNAME }}/solar:latest
+            docker run -d -p 80:8000 --env-file .env kamiorakzai/solar:latest
 
             echo "==== Deployment completed ===="
